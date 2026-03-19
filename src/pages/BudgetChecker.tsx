@@ -7,6 +7,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { BarChart3, AlertTriangle } from "lucide-react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import { getBudget, saveBudget, formatINR, BudgetData } from "@/lib/finance-store";
+import BudgetDecisionAssistant from "@/components/BudgetDecisionAssistant";
 
 const CATEGORIES = ["Food", "Transport", "Shopping", "Bills", "Entertainment"];
 const COLORS = [
