@@ -10,6 +10,7 @@ import TripTracker from "./pages/TripTracker";
 import BudgetChecker from "./pages/BudgetChecker";
 import SavingsGoal from "./pages/SavingsGoal";
 import Subscriptions from "./pages/Subscriptions";
+import ExpenseOptimizer from "./pages/ExpenseOptimizer";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
