@@ -33,25 +33,22 @@ export default function ExpensePriorityScheduler() {
   // Form state
   const [newName, setNewName] = useState("");
   const [newAmount, setNewAmount] = useState<number>(0);
-  const [newPriority, setNewPriority] = useState<string>("");
-  const [newCategory, setNewCategory] = useState<string>("");
 
   const addExpense = () => {
-    if (!newName || !newAmount || !newPriority || !newCategory) return;
+    if (!newName || !newAmount) return;
+    const { priority, category } = detectExpenseAttributes(newName);
     setExpenses((prev) => [
       ...prev,
       {
         id: crypto.randomUUID(),
         name: newName,
         amount: newAmount,
-        priority: newPriority as PriorityLevel,
-        category: newCategory as ExpenseCategory,
+        priority,
+        category,
       },
     ]);
     setNewName("");
     setNewAmount(0);
-    setNewPriority("");
-    setNewCategory("");
     setResult(null);
   };
 
