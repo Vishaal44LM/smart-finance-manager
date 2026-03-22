@@ -57,18 +57,45 @@ export default function BudgetChecker() {
     return results;
   }, [data, remainingDays]);
 
-  // Overall recommendation
+  // Overall recommendation: aggregate per-category minimax scores
   const overallResult = useMemo(() => {
     if (data.income <= 0 || totalExpenses <= 0) return null;
-    return minimaxDecision({
-      monthlyBudget: data.income,
-      totalSpent: 0,
-      newExpenseAmount: totalExpenses,
-      expenseCategory: "Bills",
-      remainingDays,
-      minimumReserve: Math.round(data.income * 0.1),
+
+    const entries = Object.entries(categoryAnalysis);
+    if (entries.length === 0) return null;
+
+    let totalSpendScore = 0;
+    let totalSaveScore = 0;
+    entries.forEach(([, res]) => {
+      totalSpendScore += res.spendScore;
+      totalSaveScore += res.saveScore;
     });
-  }, [data.income, totalExpenses, remainingDays]);
+
+    const avgSpend = Math.round(totalSpendScore / entries.length);
+    const avgSave = Math.round(totalSaveScore / entries.length);
+    const recommendation: "SPEND" | "SAVE" = avgSpend >= avgSave ? "SPEND" : "SAVE";
+    const usagePercent = Math.round((totalExpenses / data.income) * 100);
+    const reserve = Math.round(data.income * 0.1);
+
+    let reason: string;
+    if (remaining < 0) {
+      reason = `You've exceeded your budget by ${formatINR(Math.abs(remaining))}. Reduce non-essential spending immediately.`;
+    } else if (remaining < reserve) {
+      reason = `Your remaining balance (${formatINR(remaining)}) is below the safe reserve of ${formatINR(reserve)}. Consider cutting back.`;
+    } else if (usagePercent > 75) {
+      reason = `You've used ${usagePercent}% of your budget with ${remainingDays} days left. Spend cautiously.`;
+    } else {
+      reason = `You've used ${usagePercent}% of your budget. Your spending is within safe limits for the remaining ${remainingDays} days.`;
+    }
+
+    return {
+      recommendation,
+      score: Math.max(avgSpend, avgSave),
+      reason,
+      spendScore: avgSpend,
+      saveScore: avgSave,
+    } as DecisionResult;
+  }, [categoryAnalysis, data.income, totalExpenses, remaining, remainingDays]);
 
   const pieData = CATEGORIES
     .filter((c) => (data.expenses[c] || 0) > 0)
