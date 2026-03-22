@@ -96,41 +96,22 @@ export default function ExpensePriorityScheduler() {
           <CardTitle className="text-lg">Add Expense</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 items-end">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
             <div>
               <Label className="text-muted-foreground">Name</Label>
-              <Input placeholder="e.g. Groceries" value={newName} onChange={(e) => setNewName(e.target.value)} />
+              <Input placeholder="e.g. Groceries, Netflix, Rent" value={newName} onChange={(e) => setNewName(e.target.value)} />
             </div>
             <div>
               <Label className="text-muted-foreground">Amount (₹)</Label>
               <Input type="number" placeholder="e.g. 1500" value={newAmount || ""} onChange={(e) => setNewAmount(parseFloat(e.target.value) || 0)} />
             </div>
-            <div>
-              <Label className="text-muted-foreground">Priority</Label>
-              <Select value={newPriority} onValueChange={setNewPriority}>
-                <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
-                <SelectContent>
-                  {PRIORITY_OPTIONS.map((p) => (
-                    <SelectItem key={p} value={p}>{p}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label className="text-muted-foreground">Category</Label>
-              <Select value={newCategory} onValueChange={setNewCategory}>
-                <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
-                <SelectContent>
-                  {CATEGORY_OPTIONS.map((c) => (
-                    <SelectItem key={c} value={c}>{c}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <Button onClick={addExpense} disabled={!newName || !newAmount || !newPriority || !newCategory} className="gap-1">
+            <Button onClick={addExpense} disabled={!newName || !newAmount} className="gap-1">
               <Plus className="h-4 w-4" /> Add
             </Button>
           </div>
+          <p className="text-xs text-muted-foreground mt-2">
+            💡 The Greedy algorithm auto-detects priority &amp; category from the expense name (e.g. "Rent" → High / Essential, "Netflix" → Low / Non-Essential).
+          </p>
         </CardContent>
       </Card>
 
