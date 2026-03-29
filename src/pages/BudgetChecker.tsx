@@ -92,9 +92,9 @@ export default function BudgetChecker() {
     } else if (remaining < reserve) {
       reason = `Your remaining balance (${formatINR(remaining)}) is below the safe reserve of ${formatINR(reserve)}. Consider cutting back.`;
     } else if (usagePercent > 75) {
-      reason = `You've used ${usagePercent}% of your budget with ${remainingDays} days left. Spend cautiously.`;
+      reason = `You've used ${usagePercent}% of your budget. Spend cautiously.`;
     } else {
-      reason = `You've used ${usagePercent}% of your budget. Your spending is within safe limits for the remaining ${remainingDays} days.`;
+      reason = `You've used ${usagePercent}% of your budget. Your spending is within safe limits.`;
     }
 
     return {
@@ -200,7 +200,7 @@ export default function BudgetChecker() {
             <CardTitle className="text-lg flex items-center gap-2">
               <Brain className="h-5 w-5 text-primary" />
               Minimax Budget Analysis
-              <span className="text-xs font-normal text-muted-foreground ml-auto">{remainingDays} days left</span>
+              
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
