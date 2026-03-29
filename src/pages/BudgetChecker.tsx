@@ -92,9 +92,9 @@ export default function BudgetChecker() {
     } else if (remaining < reserve) {
       reason = `Your remaining balance (${formatINR(remaining)}) is below the safe reserve of ${formatINR(reserve)}. Consider cutting back.`;
     } else if (usagePercent > 75) {
-      reason = `You've used ${usagePercent}% of your budget with ${remainingDays} days left. Spend cautiously.`;
+      reason = `You've used ${usagePercent}% of your budget. Spend cautiously.`;
     } else {
-      reason = `You've used ${usagePercent}% of your budget. Your spending is within safe limits for the remaining ${remainingDays} days.`;
+      reason = `You've used ${usagePercent}% of your budget. Your spending is within safe limits.`;
     }
 
     return {
