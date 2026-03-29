@@ -40,45 +40,76 @@ function evaluateUtility(
 ): number {
   let score = 0;
 
-  // 1. Reserve safety check (heavy weight)
+  const balanceBeforeSpend = didSpend ? balanceAfter + 0 : balanceAfter; // balanceAfter already reflects the choice
+
   if (didSpend) {
+    // 1. Reserve safety check
     if (balanceAfter < 0) {
-      score -= 50; // overspent entirely
+      score -= 50;
     } else if (balanceAfter < minimumReserve) {
-      score -= 30; // below safety reserve
+      score -= 30;
     } else {
-      score += 20; // safe after spending
+      score += 20;
     }
-  } else {
-    // Saved money — always safe
-    score += 10;
-  }
 
-  // 2. Category importance
-  if (didSpend) {
+    // 2. Category importance
     if (isEssential(category)) {
-      score += 25; // essential expenses are valuable
+      score += 25;
     } else {
-      score -= 10; // non-essential penalized
+      score -= 10;
     }
-  }
 
-  // 3. Daily budget sustainability
-  const dailyBudget = remainingDays > 0 ? balanceAfter / remainingDays : 0;
-  if (didSpend) {
+    // 3. Daily budget sustainability
+    const dailyBudget = remainingDays > 0 ? balanceAfter / remainingDays : 0;
     if (dailyBudget < minimumReserve / 10) {
-      score -= 15; // leaves very little per day
+      score -= 15;
     } else {
       score += 10;
     }
-  }
 
-  // 4. Buffer ratio (balance / reserve)
-  if (didSpend && minimumReserve > 0) {
-    const bufferRatio = balanceAfter / minimumReserve;
-    if (bufferRatio >= 2) score += 10;
-    else if (bufferRatio >= 1) score += 5;
-    else score -= 10;
+    // 4. Buffer ratio
+    if (minimumReserve > 0) {
+      const bufferRatio = balanceAfter / minimumReserve;
+      if (bufferRatio >= 2) score += 10;
+      else if (bufferRatio >= 1) score += 5;
+      else score -= 10;
+    }
+  } else {
+    // SAVE path — score based on how much saving helps
+
+    // 1. Base save benefit
+    score += 10;
+
+    // 2. How tight is the budget? Saving is more valuable when budget is tight
+    if (minimumReserve > 0) {
+      const bufferRatio = balanceAfter / minimumReserve;
+      if (bufferRatio < 1) {
+        score += 25; // already below reserve, saving is critical
+      } else if (bufferRatio < 1.5) {
+        score += 18; // close to reserve, saving is important
+      } else if (bufferRatio < 2) {
+        score += 10;
+      } else {
+        score += 3; // plenty of buffer, saving has less urgency
+      }
+    }
+
+    // 3. Category consideration — skipping essential expenses has a cost
+    if (isEssential(category)) {
+      score -= 15; // penalty for not spending on essentials
+    } else {
+      score += 12; // bonus for skipping non-essentials
+    }
+
+    // 4. Daily sustainability — if daily budget is already low, saving helps more
+    const dailyBudget = remainingDays > 0 ? balanceAfter / remainingDays : 0;
+    if (dailyBudget < minimumReserve / 10) {
+      score += 15; // very tight daily budget, saving is wise
+    } else if (dailyBudget < minimumReserve / 5) {
+      score += 8;
+    } else {
+      score += 2;
+    }
   }
 
   return score;
