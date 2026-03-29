@@ -36,79 +36,99 @@ function evaluateUtility(
   minimumReserve: number,
   remainingDays: number,
   category: string,
-  didSpend: boolean
+  didSpend: boolean,
+  expenseAmount: number,
+  totalBudget: number
 ): number {
   let score = 0;
-
-  const balanceBeforeSpend = didSpend ? balanceAfter + 0 : balanceAfter; // balanceAfter already reflects the choice
+  const essential = isEssential(category);
+  // How much of the budget this expense represents (0 to 1+)
+  const expenseRatio = totalBudget > 0 ? expenseAmount / totalBudget : 0;
+  // How safe the remaining balance is relative to the reserve
+  const bufferRatio = minimumReserve > 0 ? balanceAfter / minimumReserve : 10;
+  // Usage percentage after this decision
+  const usageRatio = totalBudget > 0 ? (totalBudget - balanceAfter) / totalBudget : 0;
 
   if (didSpend) {
-    // 1. Reserve safety check
+    // === SPEND PATH ===
+
+    // 1. Reserve safety — scales with how far below/above reserve
     if (balanceAfter < 0) {
-      score -= 50;
+      score -= 40 - Math.round(expenseRatio * 20); // bigger expense = worse
     } else if (balanceAfter < minimumReserve) {
-      score -= 30;
+      score -= Math.round(20 + expenseRatio * 15);
     } else {
-      score += 20;
+      score += Math.round(15 + (bufferRatio - 1) * 8); // more buffer = more confident
     }
 
-    // 2. Category importance
-    if (isEssential(category)) {
-      score += 25;
+    // 2. Category importance — essential expenses get higher spend scores
+    if (essential) {
+      score += Math.round(20 + expenseRatio * 10); // essential + costly = still worth it
     } else {
+      score -= Math.round(5 + expenseRatio * 20); // non-essential + costly = penalized more
+    }
+
+    // 3. Expense size impact — small expenses score better for spending
+    if (expenseRatio < 0.05) {
+      score += 15; // tiny expense, safe to spend
+    } else if (expenseRatio < 0.15) {
+      score += 8;
+    } else if (expenseRatio < 0.3) {
+      score -= 5;
+    } else {
+      score -= Math.round(15 + expenseRatio * 10); // large chunk of budget
+    }
+
+    // 4. Overall budget health
+    if (usageRatio > 0.9) {
+      score -= 20;
+    } else if (usageRatio > 0.75) {
       score -= 10;
-    }
-
-    // 3. Daily budget sustainability
-    const dailyBudget = remainingDays > 0 ? balanceAfter / remainingDays : 0;
-    if (dailyBudget < minimumReserve / 10) {
-      score -= 15;
-    } else {
+    } else if (usageRatio < 0.5) {
       score += 10;
     }
 
-    // 4. Buffer ratio
-    if (minimumReserve > 0) {
-      const bufferRatio = balanceAfter / minimumReserve;
-      if (bufferRatio >= 2) score += 10;
-      else if (bufferRatio >= 1) score += 5;
-      else score -= 10;
-    }
   } else {
-    // SAVE path — score based on how much saving helps
+    // === SAVE PATH ===
 
-    // 1. Base save benefit
-    score += 10;
-
-    // 2. How tight is the budget? Saving is more valuable when budget is tight
-    if (minimumReserve > 0) {
-      const bufferRatio = balanceAfter / minimumReserve;
-      if (bufferRatio < 1) {
-        score += 25; // already below reserve, saving is critical
-      } else if (bufferRatio < 1.5) {
-        score += 18; // close to reserve, saving is important
-      } else if (bufferRatio < 2) {
-        score += 10;
-      } else {
-        score += 3; // plenty of buffer, saving has less urgency
-      }
+    // 1. Budget tightness — saving is more valuable when budget is tight
+    if (bufferRatio < 0.5) {
+      score += 35; // critically low, saving is essential
+    } else if (bufferRatio < 1) {
+      score += 25 + Math.round(expenseRatio * 10);
+    } else if (bufferRatio < 1.5) {
+      score += 15 + Math.round(expenseRatio * 8);
+    } else if (bufferRatio < 2.5) {
+      score += 8 + Math.round(expenseRatio * 5);
+    } else {
+      score += 3; // plenty of buffer, saving has low urgency
     }
 
-    // 3. Category consideration — skipping essential expenses has a cost
-    if (isEssential(category)) {
-      score -= 15; // penalty for not spending on essentials
+    // 2. Expense size — saving on bigger expenses has more impact
+    if (expenseRatio >= 0.3) {
+      score += Math.round(20 + expenseRatio * 10); // big expense, saving matters a lot
+    } else if (expenseRatio >= 0.15) {
+      score += 12;
+    } else if (expenseRatio >= 0.05) {
+      score += 5;
     } else {
-      score += 12; // bonus for skipping non-essentials
+      score += 1; // tiny expense, saving doesn't matter much
     }
 
-    // 4. Daily sustainability — if daily budget is already low, saving helps more
-    const dailyBudget = remainingDays > 0 ? balanceAfter / remainingDays : 0;
-    if (dailyBudget < minimumReserve / 10) {
-      score += 15; // very tight daily budget, saving is wise
-    } else if (dailyBudget < minimumReserve / 5) {
-      score += 8;
+    // 3. Category — skipping essentials has a cost
+    if (essential) {
+      score -= Math.round(15 + expenseRatio * 10); // worse to skip expensive essentials
     } else {
-      score += 2;
+      score += Math.round(10 + expenseRatio * 12); // better to skip expensive non-essentials
+    }
+
+    // 4. Overall budget health — more spent = more reason to save
+    if (usageRatio > 0.9) {
+      score += 20;
+    } else if (usageRatio > 0.75) {
+      score += 12;
+    } else if (usageRatio < 0.4) {
+      score -= 5; // budget is healthy, saving is less urgent
     }
   }
 
