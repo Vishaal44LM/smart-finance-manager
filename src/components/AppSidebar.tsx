@@ -9,6 +9,7 @@ import {
   Sparkles,
   Brain,
   Activity,
+  Compass,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
