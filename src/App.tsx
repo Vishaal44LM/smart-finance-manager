@@ -13,7 +13,6 @@ import Subscriptions from "./pages/Subscriptions";
 import ExpensePriorityScheduler from "./pages/ExpensePriorityScheduler";
 import BudgetOptimizer from "./pages/BudgetOptimizer";
 import FinancialAdvisor from "./pages/FinancialAdvisor";
-import FinancialHealth from "./pages/FinancialHealth";
 import MeansEndPlanner from "./pages/MeansEndPlanner";
 import NotFound from "./pages/NotFound";
 
