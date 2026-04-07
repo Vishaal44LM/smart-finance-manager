@@ -81,10 +81,6 @@ export default function MeansEndPlanner() {
               <Label className="text-muted-foreground">Monthly Budget / Income (₹)</Label>
               <Input type="number" placeholder="e.g. 30000" value={monthlyBudget || ""} onChange={e => setMonthlyBudget(parseFloat(e.target.value) || 0)} />
             </div>
-            <div>
-              <Label className="text-muted-foreground">Target Duration (months, optional)</Label>
-              <Input type="number" placeholder="e.g. 6" value={targetDuration} onChange={e => setTargetDuration(e.target.value)} />
-            </div>
           </div>
         </CardContent>
       </Card>

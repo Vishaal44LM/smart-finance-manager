@@ -245,8 +245,8 @@ function generateReason(
   if (balanceAfterSpend < minimumReserve) {
     return `Not recommended: spending ₹${newExpenseAmount.toLocaleString("en-IN")} would reduce your balance below the safe reserve of ₹${minimumReserve.toLocaleString("en-IN")}.`;
   }
-  if (!essential && remainingDays <= 7) {
-    return `Not recommended: with only ${remainingDays} days left, saving on non-essential "${expenseCategory}" expenses is wiser.`;
+  if (!essential) {
+    return `Not recommended: saving on non-essential "${expenseCategory}" expenses is the wiser choice.`;
   }
-  return `Saving is the better choice right now to maintain a healthy budget for the remaining ${remainingDays} days.`;
+  return `Saving is the better choice right now to maintain a healthy budget.`;
 }
