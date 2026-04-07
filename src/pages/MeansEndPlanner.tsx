@@ -15,7 +15,7 @@ export default function MeansEndPlanner() {
   const [currentSavings, setCurrentSavings] = useState(0);
   const [targetSavings, setTargetSavings] = useState(0);
   const [monthlyBudget, setMonthlyBudget] = useState(0);
-  const [targetDuration, setTargetDuration] = useState<string>("");
+  
 
   useEffect(() => {
     const budget = getBudget();
